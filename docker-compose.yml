@@ -1,0 +1,111 @@
+version: '3.1'
+
+services:
+    server_db_mongodb:
+        container_name: server_db_mongodb
+        image: mongo
+        restart: always
+        networks:
+            - network_mongodb
+        environment:
+            # Account settings for remote access
+            MONGO_INITDB_ROOT_USERNAME: root
+            MONGO_INITDB_ROOT_PASSWORD: test
+        ports:
+            - 27017:27017
+        volumes:
+            # Startup scripts
+            - ./mounts/scripts_init/:/docker-entrypoint-initdb.d/
+            # Actual database
+            - ./mounts/db:/data/db
+            # Archive data
+            - ./mounts/dev.archive:/Databases/dev.archive
+            # Prod data
+            - ./mounts/production:/Databases/production
+
+    # This will fail and restart multiple times until server_db_mongodb finalizes
+    # This will succeed when the last line displays:
+    # mongodb_docker-server_admin_mongodb-1  | Mongo Express server listening at http://0.0.0.0:8081
+    # mongodb_docker-server_admin_mongodb-1  | Server is open to allow connections from anyone (0.0.0.0)
+
+    # Note: I'm getting the impression that mongo-express is on its way out. The advertised features appear to be
+    # de-synching with what the server is actually capable of.
+    server_admin_mongodb:
+        container_name: server_admin_mongodb
+        depends_on:
+            - server_db_mongodb
+        environment:
+
+            # Account local to this container
+            ME_CONFIG_BASICAUTH_USERNAME: root
+            ME_CONFIG_BASICAUTH_PASSWORD: test
+
+            # Settings for accessing mongodb container
+            ME_CONFIG_MONGODB_SERVER: server_db_mongodb
+            ME_CONFIG_MONGODB_ADMINUSERNAME: root
+            ME_CONFIG_MONGODB_ADMINPASSWORD: test
+
+            # View server status
+            # Support for this was pulled from the image
+            # https://github.com/mongo-express/mongo-express/issues/809
+            #ME_CONFIG_MONGODB_ENABLE_ADMIN: true
+
+        image: mongo-express
+        networks:
+            - network_mongodb
+        ports:
+            - 8081:8081
+        restart: always
+
+networks:
+    network_mongodb:
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
